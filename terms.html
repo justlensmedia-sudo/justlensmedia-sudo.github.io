@@ -10,6 +10,42 @@
   <style>body{font-family:system-ui,sans-serif;max-width:700px;margin:40px auto;padding:20px;line-height:1.6;color:#333;}</style>
 </head>
 <body>
+  
+  <div id="tiktokAuthBox" style="display:none; margin:20px 0; padding:20px; background:#1e293b; border:1px solid #38bdf8; border-radius:12px; text-align:center; color:#fff;">
+    <h2 style="color:#22c55e; margin-top:0;">🎉 Otorisasi TikTok Diterima!</h2>
+    <p style="color:#94a3b8;">Kode Otorisasi TikTok berhasil didapatkan:</p>
+    <div id="codeDisplay" style="background:#0f172a; padding:10px; border-radius:6px; font-family:monospace; color:#38bdf8; word-break:break-all; margin:10px 0;">...</div>
+    <button onclick="copyCode()" style="background:#2563eb; color:#fff; border:none; padding:8px 18px; border-radius:8px; cursor:pointer; font-weight:bold;">📋 Salin Kode</button>
+    <div id="status" style="margin-top:12px; font-size:14px; color:#a855f7;">Mengirim otomatis ke video engine lokal...</div>
+  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    if (code) {
+      document.getElementById('tiktokAuthBox').style.display = 'block';
+      document.getElementById('codeDisplay').innerText = code;
+      const currentUri = window.location.origin + window.location.pathname;
+      fetch('http://localhost:5680/oauth/tiktok/exchange', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code, redirect_uri: currentUri })
+      })
+      .then(res => res.json())
+      .then(d => {
+        if (d.success) {
+          document.getElementById('status').innerHTML = '<b style="color:#22c55e;">✅ Berhasil terhubung ke Video Engine lokal! Halaman ini bisa ditutup.</b>';
+        } else {
+          document.getElementById('status').innerHTML = '<span style="color:#f59e0b;">Silakan salin kode di atas dan kirimkan ke asisten AI Anda.</span>';
+        }
+      })
+      .catch(() => {
+        document.getElementById('status').innerHTML = '<span style="color:#f59e0b;">Silakan salin kode di atas dan kirimkan ke asisten AI Anda.</span>';
+      });
+    }
+    function copyCode() {
+      if (code) { navigator.clipboard.writeText(code); alert('Kode berhasil disalin!'); }
+    }
+  </script>
   <h1>Terms of Service</h1>
   <p>Welcome to Auto Clipper Studio. By using our application, you agree to these terms.</p>
   <h2>1. Use of Service</h2>
