@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Otorisasi TikTok Berhasil</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    h1 { font-size: 22px; color: #22c55e; margin-bottom: 12px; }
+    p { color: #94a3b8; font-size: 15px; line-height: 1.5; margin-bottom: 20px; }
+    .code-box {
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 14px;
+      color: #38bdf8;
+      word-break: break-all;
+      margin-bottom: 16px;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: #1d4ed8; }
+    .status { margin-top: 16px; font-size: 13px; color: #a855f7; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎉 Otorisasi TikTok Diterima!</h1>
+    <p>Kode otorisasi dari TikTok berhasil didapatkan:</p>
+    <div id="codeDisplay" class="code-box">Memuat kode...</div>
+    <button onclick="copyCode()">📋 Salin Kode Otorisasi</button>
+    <div id="status" class="status">Mengirim otomatis ke video engine lokal...</div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const display = document.getElementById('codeDisplay');
+    const statusDiv = document.getElementById('status');
+
+    if (code) {
+      display.innerText = code;
+      // Coba kirim otomatis ke local video-engine
+      fetch('http://localhost:5680/oauth/tiktok/exchange', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: code,
+          redirect_uri: 'https://justlensmedia-sudo.github.io/callback.html'
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          statusDiv.innerHTML = '<b style="color:#22c55e;">✅ Berhasil tersambung ke Video Engine lokal! Anda sudah bisa menutup halaman ini.</b>';
+        } else {
+          statusDiv.innerHTML = '<span style="color:#f59e0b;">Silakan salin kode di atas dan kirimkan ke chat asisten AI Anda.</span>';
+        }
+      })
+      .catch(() => {
+        statusDiv.innerHTML = '<span style="color:#f59e0b;">Silakan salin kode di atas dan kirimkan ke chat asisten AI Anda.</span>';
+      });
+    } else {
+      display.innerText = 'Tidak ditemukan kode di URL.';
+      statusDiv.innerText = '';
+    }
+
+    function copyCode() {
+      if (code) {
+        navigator.clipboard.writeText(code);
+        alert('Kode berhasil disalin! Silakan tempel di chat asisten.');
+      }
+    }
+  </script>
+</body>
+</html>
